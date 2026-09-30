@@ -1,0 +1,588 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Опросник Uzumfermer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap">
+<style>
+body{margin:0}
+/* Layout: a single printed questionnaire sheet on a grey desk; numbered fields, ruled answer lines, answers appear in ballpoint blue. One deliberate light look. */
+:root{
+  --desk:#EFEFED; --paper:#FFFFFF; --ink:#141414; --soft:#5E5E5A; --rule:#141414; --hair:#C9C9C3;
+  --pen:#141414; --stamp:#E3241B; --fill:#F6F6F4; --grey:#8C8C8C;
+  --sans:"Inter",-apple-system,"Segoe UI",Arial,sans-serif; --narrow:var(--sans); --mono:var(--sans);
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{background:var(--desk)}
+body{color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.45;padding-inline:16px;padding-block:28px 120px}
+button,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--pen);outline-offset:2px}
+
+.sheet{max-width:780px;margin:0 auto;background:var(--paper);border:1px solid #CFCFC9;padding:44px 52px 48px}
+@media (max-width:600px){body{padding-inline:0;padding-top:0}.sheet{border:0;padding:24px 18px 36px}}
+
+/* header block */
+.hd{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 24px;align-items:end;border-bottom:1px solid var(--hair);padding-bottom:22px}
+.hd .org{font-size:12px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--ink)}
+.hd .org b{color:var(--stamp);font-weight:600}
+.hd h1{font-weight:400;font-size:clamp(40px,7vw,64px);line-height:1.05;letter-spacing:-.02em;margin:26px 0 0}
+.hd h1 span{display:block;color:var(--grey)}
+.hd .no{font-size:13px;font-variant-numeric:tabular-nums;text-align:right;color:var(--soft);line-height:1.7}
+.hd .no b{font-weight:400;color:var(--ink)}
+.meta{display:flex;flex-wrap:wrap;gap:6px 26px;padding:12px 0;border-bottom:1px solid var(--hair);font-size:15px}
+.meta .lbl{text-transform:uppercase;letter-spacing:.08em;font-size:12px;font-weight:500;color:var(--soft);margin-right:8px}
+.intro{padding:24px 0 6px;max-width:60ch;font-size:19px;line-height:1.5}
+.intro p{margin:0 0 10px}
+.intro .how{font-size:15px;color:var(--soft)}
+
+/* sections */
+.sec{margin-top:34px}
+.sec-h{display:flex;align-items:baseline;gap:16px;border-bottom:1px solid var(--ink);padding-bottom:10px}
+.sec-h .let{font-size:13px;color:var(--grey);font-variant-numeric:tabular-nums;flex:none}
+.sec-h h2{font-weight:400;font-size:30px;letter-spacing:-.015em;margin:0}
+.sec-note{font-size:15px;color:var(--soft);margin:8px 0 0;max-width:62ch}
+
+.q{display:grid;grid-template-columns:44px minmax(0,1fr);gap:0 10px;padding:18px 0 16px;border-bottom:1px solid var(--hair)}
+.q .n{font-size:13px;color:var(--grey);padding-top:4px;font-variant-numeric:tabular-nums}
+.q .t{font-weight:500;margin:0 0 4px}
+.q .t .req{font-weight:400;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--stamp);margin-left:6px;white-space:nowrap}
+.q .h{font-size:14px;color:var(--soft);margin:0 0 8px}
+.q .multi{font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--soft);margin:0 0 6px}
+@media (max-width:600px){.q{grid-template-columns:34px minmax(0,1fr)}}
+
+.boxes{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:2px 18px;margin-top:6px}
+.bx{position:relative;display:flex;gap:10px;align-items:flex-start;padding:6px 0;cursor:pointer;min-height:36px}
+.bx input{position:absolute;opacity:0;width:22px;height:22px;margin:0;cursor:pointer}
+.bx .sq{flex:none;width:20px;height:20px;border:1.5px solid var(--ink);margin-top:2px;position:relative;background:var(--paper)}
+.bx input:checked + .sq::before,.bx input:checked + .sq::after{content:"";position:absolute;left:50%;top:50%;width:24px;height:2.4px;background:var(--stamp);border-radius:2px}
+.bx input:checked + .sq::before{transform:translate(-50%,-50%) rotate(45deg)}
+.bx input:checked + .sq::after{transform:translate(-50%,-50%) rotate(-45deg)}
+.bx input:checked ~ .lb{color:var(--ink);font-weight:500}
+.bx input:focus-visible + .sq{outline:2px solid var(--pen);outline-offset:2px}
+
+.line{width:100%;border:0;border-bottom:1.5px solid var(--ink);background:transparent;padding:6px 2px 4px;font-size:18px;color:var(--pen);border-radius:0}
+.line:focus{outline:none;border-bottom-color:var(--stamp);background:var(--fill)}
+.ruled{width:100%;border:0;resize:vertical;min-height:112px;padding:0 2px;font-size:18px;line-height:32px;color:var(--pen);
+  background:repeating-linear-gradient(to bottom,transparent 0,transparent 31px,var(--ink) 31px,var(--ink) 32px);background-attachment:local;border-radius:0}
+.ruled:focus{outline:none;background-color:var(--fill)}
+.oth{display:flex;gap:10px;align-items:baseline;margin-top:6px}
+.oth span{font-size:15px;color:var(--soft);white-space:nowrap}
+.err{color:var(--stamp);font-size:14px;margin:6px 0 0}
+
+/* end block */
+.end{margin-top:44px;border-top:1px solid var(--ink);padding-top:18px;display:grid;gap:14px}
+.end h2{font-weight:400;font-size:30px;letter-spacing:-.015em;margin:0}
+.end p{margin:0;max-width:62ch}
+.btns{display:flex;flex-wrap:wrap;gap:10px}
+.b{border:1px solid var(--ink);background:var(--ink);color:#fff;font-weight:500;font-size:13px;letter-spacing:.08em;text-transform:uppercase;padding:14px 22px;gap:10px;min-height:48px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+.b.o{background:transparent;color:var(--ink);border-color:transparent;padding-inline:4px}
+.b::after{content:"\2192"}
+.b:active{transform:translateY(1px)}
+.note{font-size:14px;color:var(--soft);min-height:20px}
+.stamp{display:inline-block;border:2px solid var(--stamp);color:var(--stamp);font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:6px 14px;transform:rotate(-4deg);font-size:20px;opacity:.9}
+details summary{cursor:pointer;font-size:15px;color:var(--soft);min-height:32px}
+pre.out{white-space:pre-wrap;font:14px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--fill);padding:14px;max-height:380px;overflow:auto;margin:6px 0 0}
+
+/* bottom strip */
+.strip{position:fixed;left:0;right:0;bottom:0;padding-bottom:env(safe-area-inset-bottom,0px);background:var(--ink);color:#fff;z-index:5}
+.strip-in{max-width:780px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;font-size:12px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;font-variant-numeric:tabular-nums}
+.strip .bar{flex:1;height:4px;background:#444;max-width:260px}
+.strip .bar i{display:block;height:100%;background:var(--stamp);width:0;transition:width .3s}
+.strip a{color:#fff;text-decoration:none}
+.langs{display:inline-flex;gap:14px}
+.langs .bx{padding:0;min-height:0}
+
+/* answers tab */
+.tbl{overflow-x:auto;margin-top:10px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--hair);vertical-align:top}
+th{text-transform:uppercase;letter-spacing:.08em;font-size:11px;font-weight:500;color:var(--soft);border-bottom:1px solid var(--ink)}
+td.num{font-variant-numeric:tabular-nums;color:var(--grey);white-space:nowrap}
+.lk{border:0;background:none;color:var(--ink);text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:4px 2px;font-size:15px}
+.tabs{display:flex;gap:22px;justify-content:flex-end;max-width:780px;margin:0 auto 10px;text-transform:uppercase;letter-spacing:.08em;font-size:12px;font-weight:500}
+.tabs button{border:0;background:none;padding:4px 0;cursor:pointer;color:var(--soft)}
+.tabs button[aria-pressed="true"]{color:var(--ink);border-bottom:1px solid var(--stamp)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+
+</head><body>
+<nav id="tabs" hidden><button type="button" data-view="form"></button><button type="button" data-view="admin"></button></nav>
+<main class="sheet" id="app"></main>
+<div class="strip" id="strip"><div class="strip-in"><span id="stripTxt"></span><div class="bar" aria-hidden="true"><i id="stripBar"></i></div><a href="#send" id="stripGo"></a></div></div>
+
+<script>
+/* ---------- content ---------- */
+const S = (ru, uz) => ({ru, uz});
+const O = (...pairs) => pairs.map(p => ({ru:p[0], uz:p[1]}));
+const OTHER = S("Другое","Boshqa");
+const FREQ = O(["Часто","Tez-tez"],["Иногда","Ba'zan"],["Редко","Kamdan-kam"],["Не бывает","Bo'lmaydi"]);
+const YND = O(["Да","Ha"],["Нет","Yo'q"],["Не знаю","Bilmayman"]);
+
+const ROLES = O(
+  ["Руководитель или собственник","Rahbar yoki egasi"],
+  ["Администратор или ресепшен","Administrator yoki resepshn"],
+  ["Менеджер: продажи, мероприятия, экскурсии","Menejer: sotuv, tadbirlar, ekskursiyalar"],
+  ["Маркетинг, SMM, контент","Marketing, SMM, kontent"],
+  ["Другое","Boshqa"]);
+const ROLE_KEYS = ["owner","admin","sales","marketing","other"];
+
+const SECTIONS = [
+ {id:"about", roles:"*", t:S("О вас","Siz haqingizda"),
+  sub:S("Ответы подписаны, чтобы на ферме мы могли уточнить детали у вас лично.","Fermada tafsilotlarni sizdan shaxsan aniqlashtirishimiz uchun javoblar imzolanadi."),
+  q:[
+   {id:"name",t:"text",req:1,l:S("Имя и фамилия","Ism va familiya")},
+   {id:"role",t:"single",req:1,l:S("Ваша роль","Sizning rolingiz"),o:ROLES},
+   {id:"dir",t:"multi",l:S("С каким направлением работаете?","Qaysi yo'nalish bilan ishlaysiz?"),o:O(
+     ["Винодельня и дегустации","Vinochilik va degustatsiya"],["Ресторан","Restoran"],["Отель, проживание","Mehmonxona, turar joy"],
+     ["Эко-продукты","Eko-mahsulotlar"],["Мероприятия и праздники","Tadbirlar va bayramlar"],["Экскурсии по ферме","Ferma bo'ylab ekskursiyalar"],["Со всеми","Hammasi bilan"])},
+   {id:"tenure",t:"single",l:S("Сколько вы работаете в Uzumfermer?","Uzumfermerda qancha vaqtdan beri ishlaysiz?"),o:O(
+     ["Меньше 6 месяцев","6 oydan kam"],["6-12 месяцев","6-12 oy"],["1-3 года","1-3 yil"],["Больше 3 лет","3 yildan ko'p"])},
+   {id:"contact",t:"text",l:S("Telegram или телефон для уточнений","Aniqlashtirish uchun Telegram yoki telefon")}
+  ]},
+
+ {id:"leads", roles:["admin","sales","marketing","other"], t:S("Заявки","Arizalar"),
+  sub:S("Как клиенты находят вас и что происходит дальше. Пишите как есть, правильных ответов нет.","Mijozlar sizni qanday topadi va keyin nima bo'ladi. Qanday bo'lsa shunday yozing, to'g'ri javob yo'q."),
+  q:[
+   {id:"l_channels",t:"multi",other:1,l:S("Откуда к вам приходят заявки?","Arizalar sizga qayerdan keladi?"),o:O(
+     ["Instagram: директ, комментарии","Instagram: direkt, izohlar"],["Telegram","Telegram"],["WhatsApp","WhatsApp"],
+     ["Звонок на общий номер","Umumiy raqamga qo'ng'iroq"],["Звонок на мой личный номер","Shaxsiy raqamimga qo'ng'iroq"],
+     ["Сайт","Sayt"],["Лично на ферме","Fermada shaxsan"],["Через коллег","Hamkasblar orqali"],["Bitrix","Bitrix"])},
+   {id:"l_perday",t:"single",l:S("Сколько заявок в день вы обрабатываете сами?","Kuniga nechta arizani o'zingiz ko'rib chiqasiz?"),o:O(
+     ["0-5","0-5"],["5-15","5-15"],["15-30","15-30"],["Больше 30","30 dan ko'p"])},
+   {id:"l_peak",t:"text",l:S("Когда заявок больше всего: месяцы, дни, часы?","Arizalar eng ko'p qachon bo'ladi: oylar, kunlar, soatlar?")},
+   {id:"l_where",t:"multi",other:1,l:S("Где вы ведёте заявку, пока клиент не приехал?","Mijoz kelguncha arizani qayerda yuritasiz?"),o:O(
+     ["Личный Telegram","Shaxsiy Telegram"],["WhatsApp","WhatsApp"],["Bitrix","Bitrix"],["Excel или Google таблица","Excel yoki Google jadval"],
+     ["Блокнот, тетрадь","Daftar"],["Запоминаю","Yodda saqlayman"])},
+   {id:"l_speed",t:"single",l:S("Как быстро вы обычно отвечаете на новую заявку?","Yangi arizaga odatda qancha tez javob berasiz?"),o:O(
+     ["До 5 минут","5 daqiqagacha"],["До 30 минут","30 daqiqagacha"],["В течение пары часов","Bir-ikki soat ichida"],["На следующий день","Ertasi kuni"],["По-разному","Har xil"])},
+   {id:"l_lost",t:"single",l:S("Бывает, что заявка теряется или клиенту никто не ответил?","Ariza yo'qolishi yoki mijozga hech kim javob bermasligi bo'ladimi?"),o:FREQ},
+   {id:"l_lost_why",t:"area",l:S("Почему заявки теряются? Опишите последний случай.","Arizalar nega yo'qoladi? Oxirgi holatni yozing.")},
+   {id:"l_spam",t:"single",l:S("Какая доля входящих сообщений спам или не по делу?","Kiruvchi xabarlarning qancha qismi spam yoki mavzuga aloqasiz?"),o:O(
+     ["Меньше 10%","10% dan kam"],["10-30%","10-30%"],["30-50%","30-50%"],["Больше половины","Yarmidan ko'p"])},
+   {id:"l_handoff",t:"area",l:S("Что происходит с заявкой после вас? Кому и как вы её передаёте?","Sizdan keyin ariza bilan nima bo'ladi? Uni kimga va qanday topshirasiz?")},
+   {id:"l_faq",t:"area",l:S("Пять вопросов, которые клиенты задают чаще всего","Mijozlar eng ko'p beradigan beshta savol"),
+     h:S("Например: сколько стоит, как доехать, можно ли с детьми.","Masalan: qancha turadi, qanday borish mumkin, bolalar bilan mumkinmi.")},
+   {id:"l_lang",t:"multi",other:1,l:S("На каких языках пишут и звонят клиенты?","Mijozlar qaysi tillarda yozadi va qo'ng'iroq qiladi?"),o:O(
+     ["Русский","Rus tili"],["Узбекский","O'zbek tili"],["Английский","Ingliz tili"])},
+   {id:"l_pay",t:"single",l:S("Как клиент бронирует и платит?","Mijoz qanday bron qiladi va to'laydi?"),o:O(
+     ["Предоплата переводом","Oldindan o'tkazma"],["Оплата на месте","Joyida to'lov"],["Счёт для компаний","Kompaniyalar uchun hisob"],["По-разному","Har xil"])}
+  ]},
+
+ {id:"crm", roles:["admin","sales","marketing","other"], t:S("Bitrix и инструменты","Bitrix va vositalar"),
+  sub:S("Нам важно понять, почему система не прижилась. Критика здесь полезнее похвалы.","Tizim nega o'rnashmaganini tushunishimiz muhim. Bu yerda tanqid maqtovdan foydaliroq."),
+  q:[
+   {id:"c_use",t:"single",l:S("Как часто вы пользуетесь Bitrix?","Bitrixdan qanchalik tez-tez foydalanasiz?"),o:O(
+     ["Каждый день","Har kuni"],["Несколько раз в неделю","Haftada bir necha marta"],["Редко","Kamdan-kam"],["Не пользуюсь","Foydalanmayman"],["Нет доступа","Kirish huquqim yo'q"])},
+   {id:"c_what",t:"multi",l:S("Что вы делаете в Bitrix?","Bitrixda nima qilasiz?"),o:O(
+     ["Заношу заявки","Arizalarni kiritaman"],["Смотрю расписание и брони","Jadval va bronlarni ko'raman"],["Ставлю задачи коллегам","Hamkasblarga vazifa beraman"],
+     ["Смотрю отчёты","Hisobotlarni ko'raman"],["Звонки","Qo'ng'iroqlar"],["Переписка с клиентами","Mijozlar bilan yozishma"],["Ничего","Hech narsa"])},
+   {id:"c_why",t:"multi",other:1,l:S("Если пользуетесь редко, почему?","Agar kam foydalansangiz, nega?"),o:O(
+     ["Неудобно и долго","Noqulay va uzoq"],["Неудобно с телефона","Telefondan noqulay"],["Никто не обучал","Hech kim o'rgatmagan"],
+     ["Клиенты пишут в мессенджеры, переносить долго","Mijozlar messenjerga yozadi, ko'chirish uzoq"],["Не вижу пользы","Foydasini ko'rmayman"],["Руководство не требует","Rahbariyat talab qilmaydi"])},
+   {id:"c_ideal",t:"area",l:S("Если бы вы сами придумали систему для заявок, как бы она работала?","Arizalar uchun tizimni o'zingiz o'ylab topsangiz, u qanday ishlardi?")},
+   {id:"c_ai",t:"single",l:S("ИИ помощник сам отвечает на простые вопросы и передаёт вам готовую заявку. Как вы к этому отнесётесь?","Sun'iy intellekt yordamchisi oddiy savollarga o'zi javob beradi va sizga tayyor arizani topshiradi. Bunga qanday qaraysiz?"),o:O(
+     ["Хорошо, сэкономит время","Yaxshi, vaqtni tejaydi"],["Нужно попробовать","Sinab ko'rish kerak"],["Сомневаюсь","Shubham bor"],["Против","Qarshiman"])},
+   {id:"c_ai_why",t:"text",l:S("Почему?","Nega?")}
+  ]},
+
+ {id:"phone", roles:["admin","sales","other"], t:S("Звонки","Qo'ng'iroqlar"),
+  sub:S("Это нужно, чтобы понять, какая телефония вам подойдёт.","Bu sizga qaysi telefoniya mos kelishini tushunish uchun kerak."),
+  q:[
+   {id:"p_number",t:"single",l:S("На какой номер вам звонят клиенты?","Mijozlar sizga qaysi raqamga qo'ng'iroq qiladi?"),o:O(
+     ["Общий номер компании","Kompaniyaning umumiy raqami"],["Мой личный","Shaxsiy raqamim"],["Рабочий номер, выданный мне","Menga berilgan ish raqami"],["На оба","Ikkalasiga ham"])},
+   {id:"p_calls",t:"single",l:S("Сколько звонков от клиентов в день?","Kuniga mijozlardan nechta qo'ng'iroq?"),o:O(
+     ["0-5","0-5"],["5-15","5-15"],["15-40","15-40"],["Больше 40","40 dan ko'p"])},
+   {id:"p_missed",t:"single",l:S("Бывают пропущенные звонки, на которые никто не перезвонил?","Hech kim qayta qo'ng'iroq qilmagan o'tkazib yuborilgan qo'ng'iroqlar bo'ladimi?"),o:FREQ},
+   {id:"p_rec",t:"single",l:S("Записываются ли разговоры с клиентами?","Mijozlar bilan suhbatlar yozib olinadimi?"),o:YND},
+   {id:"p_sipuni",t:"single",l:S("Вы пользуетесь Sipuni?","Sipunidan foydalanasizmi?"),o:O(
+     ["Пользуюсь","Foydalanaman"],["Слышал(а), но не пользуюсь","Eshitganman, lekin foydalanmayman"],["Не знаю, что это","Nima ekanini bilmayman"])}
+  ]},
+
+ {id:"mkt", roles:["marketing"], t:S("Маркетинг и контент","Marketing va kontent"),
+  sub:S("Примерных цифр достаточно.","Taxminiy raqamlar yetarli."),
+  q:[
+   {id:"m_accounts",t:"area",l:S("Какие аккаунты и каналы ведёте? Ссылки и примерное число подписчиков","Qaysi akkaunt va kanallarni yuritasiz? Havolalar va taxminiy obunachilar soni")},
+   {id:"m_budget",t:"single",l:S("Бюджет на таргетированную рекламу в месяц","Oyiga target reklama byudjeti"),o:O(
+     ["До $300","300$ gacha"],["$300-1000","300-1000$"],["$1000-3000","1000-3000$"],["Больше $3000","3000$ dan ko'p"],["Не знаю","Bilmayman"])},
+   {id:"m_cpl",t:"text",l:S("Сколько стоит одна заявка из рекламы, если считаете?","Agar hisoblasangiz, reklamadan bitta ariza qancha turadi?")},
+   {id:"m_track",t:"single",l:S("Вы знаете, сколько заявок из рекламы дошли до оплаты?","Reklamadan kelgan arizalarning qanchasi to'lovgacha yetganini bilasizmi?"),o:O(
+     ["Да, считаем","Ha, hisoblaymiz"],["Примерно","Taxminan"],["Нет","Yo'q"])},
+   {id:"m_events",t:"area",l:S("Как проходит запись на мероприятия до 1000 человек? Где регистрируются, как подтверждают?","1000 kishigacha tadbirlarga yozilish qanday bo'ladi? Qayerda ro'yxatdan o'tadi, qanday tasdiqlanadi?")},
+   {id:"m_content",t:"multi",l:S("Какой контент у вас уже есть?","Sizda qanday kontent bor?"),o:O(
+     ["Профессиональные фото фермы","Fermaning professional suratlari"],["Фото с телефона","Telefondan suratlar"],["Видео и рилсы","Video va rilslar"],
+     ["Фото гостей и мероприятий","Mehmonlar va tadbirlar suratlari"],["Логотип в исходниках","Logotip manba fayllari"],["Почти ничего","Deyarli hech narsa"])},
+   {id:"m_help",t:"area",l:S("Что в маркетинге сейчас отнимает больше всего времени или не получается?","Marketingda hozir nima eng ko'p vaqt oladi yoki chiqmayapti?")}
+  ]},
+
+ {id:"train", roles:["admin","sales","marketing","other"], t:S("Обучение","O'qitish"),
+  sub:S("По этим ответам соберём программу обучения команды.","Shu javoblar asosida jamoani o'qitish dasturini tuzamiz."),
+  q:[
+   {id:"t_want",t:"multi",l:S("Чему хотели бы научиться?","Nimani o'rganishni xohlaysiz?"),o:O(
+     ["Продажи по телефону","Telefon orqali sotuv"],["Переписка с клиентом","Mijoz bilan yozishma"],["Работа в CRM","CRM bilan ishlash"],
+     ["Работа с ИИ помощником","Sun'iy intellekt yordamchisi bilan ishlash"],["Сервис и гостеприимство","Servis va mehmondo'stlik"],["Английский для гостей","Mehmonlar uchun ingliz tili"])},
+   {id:"t_format",t:"single",l:S("Удобный формат обучения","Qulay o'qitish formati"),o:O(
+     ["Очно на ферме","Fermada yuzma-yuz"],["Онлайн созвон","Onlayn qo'ng'iroq"],["Короткие видео","Qisqa videolar"],["Инструкции и скрипты","Yo'riqnoma va skriptlar"])},
+   {id:"t_script",t:"single",l:S("Если отвечать клиентам по готовому скрипту, вам будет","Mijozlarga tayyor skript bo'yicha javob berish siz uchun"),o:O(
+     ["Удобно","Qulay"],["Нормально, если можно менять","Agar o'zgartirish mumkin bo'lsa, yaxshi"],["Неудобно","Noqulay"])},
+   {id:"t_free",t:"area",l:S("Что ещё нам важно знать о вашей работе?","Ishingiz haqida yana nimani bilishimiz muhim?")}
+  ]},
+
+ {id:"biz", roles:["owner"], t:S("Бизнес и цифры","Biznes va raqamlar"),
+  sub:S("Примерных цифр достаточно. Данные нужны для расчёта экономики и остаются у агентства.","Taxminiy raqamlar yetarli. Ma'lumotlar iqtisodiyotni hisoblash uchun kerak va agentlikda qoladi."),
+  q:[
+   {id:"b_dirs",t:"area",l:S("Направления кластера и примерная доля каждого в выручке","Klaster yo'nalishlari va har birining tushumdagi taxminiy ulushi"),
+     h:S("Например: вино 40%, ресторан 25%, отель 20%, эко-продукты 15%.","Masalan: vino 40%, restoran 25%, mehmonxona 20%, eko-mahsulotlar 15%.")},
+   {id:"b_guests",t:"text",l:S("Сколько гостей в месяц в сезон и вне сезона?","Mavsumda va mavsumdan tashqari oyiga nechta mehmon?")},
+   {id:"b_check",t:"text",l:S("Средний чек по основным направлениям","Asosiy yo'nalishlar bo'yicha o'rtacha chek")},
+   {id:"b_margin",t:"text",l:S("Примерная маржа по направлениям, если готовы поделиться","Agar ulashishga tayyor bo'lsangiz, yo'nalishlar bo'yicha taxminiy marja")},
+   {id:"b_season",t:"area",l:S("Сезонность: сильные и слабые месяцы","Mavsumiylik: kuchli va kuchsiz oylar")},
+   {id:"b_goal",t:"area",l:S("Главная цель на 12 месяцев в цифрах","12 oylik asosiy maqsad raqamlarda"),
+     h:S("Например: +30% гостей, загрузка отеля 70%, онлайн продажи эко-продуктов.","Masalan: mehmonlar +30%, mehmonxona bandligi 70%, eko-mahsulotlarni onlayn sotish.")},
+   {id:"b_team",t:"area",l:S("Кто из сотрудников работает с клиентами и кто за что отвечает?","Qaysi xodimlar mijozlar bilan ishlaydi va kim nimaga javob beradi?")}
+  ]},
+
+ {id:"tech", roles:["owner"], t:S("Bitrix, телефония, ИИ","Bitrix, telefoniya, SI"),
+  sub:S("Разберёмся, что оставить, что починить и от чего можно отказаться.","Nimani qoldirish, nimani tuzatish va nimadan voz kechish mumkinligini aniqlaymiz."),
+  q:[
+   {id:"o_bx_cost",t:"text",l:S("Сколько стоит лицензия Bitrix в год и когда продление?","Bitrix litsenziyasi yiliga qancha turadi va qachon uzaytiriladi?")},
+   {id:"o_bx_tariff",t:"text",l:S("Какой тариф и сколько пользователей?","Qaysi tarif va nechta foydalanuvchi?")},
+   {id:"o_bx_use",t:"multi",l:S("Что из Bitrix реально нужно вам как руководителю?","Bitrixdan rahbar sifatida sizga haqiqatan nima kerak?"),o:O(
+     ["Отчёты по продажам","Sotuv hisobotlari"],["Контроль сотрудников","Xodimlarni nazorat qilish"],["База клиентов","Mijozlar bazasi"],
+     ["Воронка заявок","Arizalar voronkasi"],["Задачи","Vazifalar"],["Телефония","Telefoniya"],["Пока ничего","Hozircha hech narsa"])},
+   {id:"o_bx_ai",t:"area",l:S("Что пытались подключить к Bitrix (ИИ, боты) и на чём остановилось? Кто это делал?","Bitrixga nimani ulashga urinishgan (SI, botlar) va nimada to'xtagan? Buni kim qilgan?")},
+   {id:"o_bx_keep",t:"single",l:S("Если найдётся решение проще и дешевле Bitrix, готовы перейти?","Bitrixdan oddiyroq va arzonroq yechim topilsa, o'tishga tayyormisiz?"),o:O(
+     ["Да","Ha"],["Готов рассмотреть","Ko'rib chiqishga tayyorman"],["Нет, Bitrix оставляем","Yo'q, Bitrix qoladi"])},
+   {id:"o_sipuni",t:"area",l:S("Что подключено через Sipuni: номера, телефония, связь с Bitrix? Кто сейчас этим занимается?","Sipuni orqali nima ulangan: raqamlar, telefoniya, Bitrix bilan bog'lanish? Hozir bu bilan kim shug'ullanadi?")},
+   {id:"o_desk",t:"single",l:S("Отдел обработки заявок: какой вариант вам ближе?","Arizalarni qayta ishlash bo'limi: qaysi variant sizga yaqinroq?"),o:O(
+     ["Свой отдел в штате","O'z shtatdagi bo'lim"],["Удалённый колл-центр агентства","Agentlikning masofaviy koll-markazi"],
+     ["ИИ помощник и 1-2 сотрудника","SI yordamchi va 1-2 xodim"],["Хочу увидеть сравнение","Taqqoslashni ko'rmoqchiman"])},
+   {id:"o_access",t:"multi",l:S("Какие доступы можете дать для аудита?","Audit uchun qanday kirish huquqlarini bera olasiz?"),o:O(
+     ["Bitrix, гостевой доступ","Bitrix, mehmon kirish"],["Sipuni","Sipuni"],["Статистика Instagram","Instagram statistikasi"],
+     ["Рекламный кабинет","Reklama kabineti"],["Сайт","Sayt"],["Пока никакие","Hozircha hech qanday"])}
+  ]},
+
+ {id:"brand", roles:["owner"], t:S("Бренд","Brend"),
+  sub:S("Основа для логотипа, фирменного стиля и нового сайта.","Logotip, firma uslubi va yangi sayt uchun asos."),
+  q:[
+   {id:"br_logo",t:"single",l:S("Есть ли логотип в векторе и правила его использования?","Vektor logotip va undan foydalanish qoidalari bormi?"),o:O(
+     ["Есть логотип и брендбук","Logotip va brendbuk bor"],["Только логотип","Faqat logotip"],["Нет","Yo'q"])},
+   {id:"br_words",t:"text",l:S("Три слова, которыми гости должны описывать Uzumfermer","Mehmonlar Uzumfermerni tasvirlaydigan uchta so'z")},
+   {id:"br_audience",t:"area",l:S("Кто ваш главный гость? Возраст, откуда, с кем приезжает","Asosiy mehmoningiz kim? Yoshi, qayerdan, kim bilan keladi")},
+   {id:"br_refs",t:"area",l:S("Бренды, которые вам нравятся: любые страны и отрасли","Sizga yoqadigan brendlar: har qanday mamlakat va soha")},
+   {id:"br_site",t:"area",l:S("Что не нравится в текущем сайте и соцсетях?","Hozirgi sayt va ijtimoiy tarmoqlarda nima yoqmaydi?")},
+   {id:"br_names",t:"area",l:S("Как правильно пишется бренд? Есть ли суббренды: вино, эко-продукты, отель?","Brend qanday to'g'ri yoziladi? Sub-brendlar bormi: vino, eko-mahsulotlar, mehmonxona?")}
+  ]},
+
+ {id:"deal", roles:["owner"], t:S("Сотрудничество","Hamkorlik"),
+  sub:S("По этим ответам мы посчитаем три модели оплаты и покажем выгоду для каждой стороны.","Shu javoblar asosida uchta to'lov modelini hisoblaymiz va har bir tomon uchun foydani ko'rsatamiz."),
+  q:[
+   {id:"d_expect",t:"area",l:S("Каким должен быть результат через 6 месяцев работы с агентством?","Agentlik bilan 6 oy ishlagandan keyin natija qanday bo'lishi kerak?")},
+   {id:"d_kpi",t:"multi",l:S("По каким цифрам будете оценивать работу?","Ishni qaysi raqamlar bo'yicha baholaysiz?"),o:O(
+     ["Число заявок","Arizalar soni"],["Число гостей","Mehmonlar soni"],["Выручка","Tushum"],["Стоимость привлечения гостя","Mehmon jalb qilish narxi"],
+     ["Скорость ответа клиенту","Mijozga javob tezligi"],["Узнаваемость бренда","Brend taniqliligi"])},
+   {id:"d_model",t:"single",l:S("Какая модель оплаты агентству вам ближе?","Agentlikka to'lovning qaysi modeli sizga yaqinroq?"),o:O(
+     ["Фиксированная оплата и рекламный бюджет","Belgilangan to'lov va reklama byudjeti"],["Небольшой фикс и % с продаж","Kichik belgilangan to'lov va sotuvdan %"],
+     ["Только % с продаж","Faqat sotuvdan %"],["Хочу увидеть расчёт всех вариантов","Barcha variantlar hisobini ko'rmoqchiman"])},
+   {id:"d_budget",t:"single",l:S("Какой общий бюджет на маркетинг в месяц комфортен?","Oyiga marketing uchun qanday umumiy byudjet qulay?"),o:O(
+     ["До $1000","1000$ gacha"],["$1000-3000","1000-3000$"],["$3000-7000","3000-7000$"],["Больше $7000","7000$ dan ko'p"],["Обсудим","Muhokama qilamiz"])},
+   {id:"d_data",t:"single",l:S("Готовы делиться данными о продажах для расчёта % и отчётов?","Foiz va hisobotlar uchun sotuv ma'lumotlarini ulashishga tayyormisiz?"),o:O(
+     ["Да","Ha"],["Частично","Qisman"],["Нет","Yo'q"])},
+   {id:"d_decide",t:"text",l:S("Кто кроме вас принимает решение о сотрудничестве?","Hamkorlik bo'yicha sizdan tashqari kim qaror qabul qiladi?")},
+   {id:"d_visit",t:"area",l:S("Кого и что обязательно показать нам на ферме?","Fermada bizga kimni va nimani albatta ko'rsatish kerak?")}
+  ]}
+];
+
+
+
+const UI = {
+ ru:{title:"Анкета для", org:"Агентство Promotion", for:"сотрудников Uzumfermer", no:"Анкета №", date:"Дата", lang:"Язык анкеты",
+   p1:"Здравствуйте! Мы агентство Promotion. Дмитрий попросил нас разобраться, как у вас сейчас работают заявки, звонки и переписка с гостями, и что можно упростить.",
+   p2:"Отвечайте как есть, это не проверка и не оценка вашей работы. Пропускать вопросы можно. Обязательны только имя и должность.",
+   how:"Займёт около 10 минут. Когда закончите, внизу нажмите «Отправить анкету». Ответы сразу придут в агентство.",
+   sec:"Раздел", req:"обязательно", multi:"можно отметить несколько", other:"Другое:", need:"Заполните это поле.",
+   filled:(a,b)=>`Заполнено ${a} из ${b}`, toEnd:"К отправке ↓",
+   endH:"Отправка анкеты", endP:"Проверьте ответы и нажмите кнопку. Анкета сразу придёт в агентство Promotion.", sendBtn:"Отправить анкету", sending:"Отправляем…", fail:"Не удалось отправить. Проверьте интернет и нажмите ещё раз.", thanks:"Спасибо! Анкета получена. Страницу можно закрыть.",
+   endNeed:"Сначала укажите имя и должность в разделе А.", tg:"Отправить в Telegram", copy:"Скопировать текст", file:"Скачать файл",
+   copied:"Текст скопирован.", saved:"Анкета сохранена у агентства.", see:"Показать текст ответов", again:"Новая анкета, для другого сотрудника", sent:"Отправлено",
+   letters:"АБВГДЕЖЗИК",
+   adm:{t1:"1. Рассылка", t2:"2. Кто ответил", t3:"3. Анкеты", inviteP:"Готовое сообщение со ссылкой. Отправьте Дмитрию, он перешлёт команде, или сразу в рабочий чат сотрудников. Перед этим включите в меню Share доступ по ссылке.", inviteRu:"Сообщение на русском", inviteUz:"Сообщение на узбекском", copyInv:"Скопировать", sendInv:"Отправить в Telegram", invCopied:"Скопировано.", rosterP:"Впишите сотрудников, по одному в строке: имя и фамилия. Анкеты сверяются по имени автоматически.", rosterSave:"Сохранить список", rosterSaved:"Список сохранён.", got:"получено", wait:"ждём", notInList:"Ответили, но нет в списке", progress:(a,b)=>`Получено ${a} из ${b}`, noRoster:"Список пока пуст. Впишите сотрудников выше, чтобы видеть, кто ещё не ответил.", h:"Полученные анкеты", sub:"Видите только вы. Сообщение из Telegram вставьте целиком в поле ниже.", name:"Имя", role:"Должность", date:"Дата", src:"Откуда",
+     open:"открыть", hide:"скрыть", del:"удалить", sure:"точно удалить", no:"отмена", paste:"Сообщение из Telegram", add:"Добавить анкету", added:"Анкета добавлена.",
+     bad:"Не нашёл код анкеты. Вставьте сообщение целиком, вместе со строкой UZF1.", csv:"Скачать таблицу", empty:"Пока анкет нет.", form:"форма", tg:"Telegram", nodb:"Хранилище сейчас недоступно."}},
+ uz:{title:"So'rovnoma", org:"Promotion agentligi", for:"Uzumfermer xodimlari uchun", no:"So'rovnoma №", date:"Sana", lang:"So'rovnoma tili",
+   p1:"Assalomu alaykum! Biz Promotion agentligimiz. Dmitriy bizdan hozir arizalar, qo'ng'iroqlar va mehmonlar bilan yozishma qanday ishlashini va nimani soddalashtirish mumkinligini aniqlashni so'radi.",
+   p2:"Qanday bo'lsa shunday javob bering, bu tekshiruv yoki ishingizga baho emas. Savollarni o'tkazib yuborish mumkin. Faqat ism va lavozim majburiy.",
+   how:"Taxminan 10 daqiqa oladi. Tugatgach, pastdagi «So'rovnomani yuborish» tugmasini bosing. Javoblar darhol agentlikka keladi.",
+   sec:"Bo'lim", req:"majburiy", multi:"bir nechtasini belgilash mumkin", other:"Boshqa:", need:"Bu maydonni to'ldiring.",
+   filled:(a,b)=>`To'ldirildi ${a} / ${b}`, toEnd:"Yuborishga ↓",
+   endH:"So'rovnomani yuborish", endP:"Javoblarni tekshiring va tugmani bosing. So'rovnoma darhol Promotion agentligiga keladi.", sendBtn:"So'rovnomani yuborish", sending:"Yuborilmoqda…", fail:"Yuborib bo'lmadi. Internetni tekshiring va yana bosing.", thanks:"Rahmat! So'rovnoma qabul qilindi. Sahifani yopish mumkin.",
+   endNeed:"Avval A bo'limida ism va lavozimni kiriting.", tg:"Telegramga yuborish", copy:"Matnni nusxalash", file:"Faylni yuklab olish",
+   copied:"Matn nusxalandi.", saved:"So'rovnoma agentlikda saqlandi.", see:"Javoblar matnini ko'rsatish", again:"Boshqa xodim uchun yangi so'rovnoma", sent:"Yuborildi",
+   letters:"ABCDEFGHIJ",
+   adm:{t1:"1. Tarqatish", t2:"2. Kim javob berdi", t3:"3. So'rovnomalar", inviteP:"Havola bilan tayyor xabar. Dmitriyga yuboring, u jamoaga uzatadi, yoki to'g'ridan-to'g'ri xodimlar chatiga. Oldin Share menyusida havola orqali kirishni yoqing.", inviteRu:"Rus tilidagi xabar", inviteUz:"O'zbek tilidagi xabar", copyInv:"Nusxalash", sendInv:"Telegramga yuborish", invCopied:"Nusxalandi.", rosterP:"Xodimlarni har qatorga bittadan yozing: ism va familiya. So'rovnomalar ism bo'yicha avtomatik solishtiriladi.", rosterSave:"Ro'yxatni saqlash", rosterSaved:"Ro'yxat saqlandi.", got:"keldi", wait:"kutyapmiz", notInList:"Javob berdi, lekin ro'yxatda yo'q", progress:(a,b)=>`Keldi ${a} / ${b}`, noRoster:"Ro'yxat hozircha bo'sh. Kim javob bermaganini ko'rish uchun xodimlarni yuqoriga yozing.", h:"Kelgan so'rovnomalar", sub:"Faqat siz ko'rasiz. Telegramdagi xabarni quyidagi maydonga to'liq qo'ying.", name:"Ism", role:"Lavozim", date:"Sana", src:"Manba",
+     open:"ochish", hide:"yopish", del:"o'chirish", sure:"rostdan o'chirish", no:"bekor", paste:"Telegramdagi xabar", add:"So'rovnoma qo'shish", added:"So'rovnoma qo'shildi.",
+     bad:"So'rovnoma kodi topilmadi. Xabarni UZF1 qatori bilan birga to'liq qo'ying.", csv:"Jadvalni yuklab olish", empty:"Hozircha so'rovnoma yo'q.", form:"forma", tg:"Telegram", nodb:"Ombor hozir mavjud emas."}}
+};
+SECTIONS[0].q[1].l = S("Ваша должность","Lavozimingiz");
+
+
+/* ---------- encrypted delivery ---------- */
+const RELAY = "https://ntfy.sh", TOPIC = "uzf-zlto3oqr3skhyi4iaflclvit", PUBKEY = `-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu4pPanlRoPKyJ3HXUPxm
+ruzI3Ok+hO2i/SrN0oKxIyHizuHkrWZQFaB30kOnOlu09jy2GP4l5wjBpxaY8z8p
+fh7nMM2ykGSBg0b41fOuEdBZiJBECpZpvU6sZu9Hq14ipvX/FRTW1njt9BTCoGRt
+OImJ8160hU4FIsQyWAMBxiTXZ83QELOCbWYVFWBORGGRCLFhVPeocpsifHPvtQhs
+g+0verkgipUi73dYP7+0mleGzEETcfDV3YLdEQK2eYHxGerYKiTgjtZ8qHnAy4AY
+gIq/Suzn16qgiElz6K5zfZeRgozD1uX5pACHnIn7MxEH0z0wm2kI/4w5waqaEbAu
+cwIDAQAB
+-----END PUBLIC KEY-----`;
+const b64e = u => { let s = ""; for(let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(s); };
+async function seal(rec){
+  const raw = new TextEncoder().encode(JSON.stringify(rec));
+  let data = raw, z = "0";
+  if(window.CompressionStream){ try{ data = new Uint8Array(await new Response(new Blob([raw]).stream().pipeThrough(new CompressionStream("gzip"))).arrayBuffer()); z = "1"; }catch(e){ data = raw; z = "0"; } }
+  const der = Uint8Array.from(atob(PUBKEY.replace(/-----[^-]+-----|\s/g, "")), c => c.charCodeAt(0));
+  const pub = await crypto.subtle.importKey("spki", der, {name:"RSA-OAEP", hash:"SHA-256"}, false, ["encrypt"]);
+  const aes = await crypto.subtle.generateKey({name:"AES-GCM", length:256}, true, ["encrypt"]);
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = new Uint8Array(await crypto.subtle.encrypt({name:"AES-GCM", iv}, aes, data));
+  const ek = new Uint8Array(await crypto.subtle.encrypt({name:"RSA-OAEP"}, pub, new Uint8Array(await crypto.subtle.exportKey("raw", aes))));
+  return [z, b64e(ek), b64e(iv), b64e(ct)].join(".");
+}
+async function sendEncrypted(rec){
+  const env = await seal(rec), size = 3000, n = Math.ceil(env.length / size);
+  const gid = Array.from(crypto.getRandomValues(new Uint8Array(8)), b => b.toString(16).padStart(2, "0")).join("");
+  for(let i = 0; i < n; i++){
+    const body = `UZF2|${gid}|${i}|${n}|${env.slice(i * size, (i + 1) * size)}`;
+    let ok = false;
+    for(let t = 0; t < 3 && !ok; t++){
+      try{ const r = await fetch(`${RELAY}/${TOPIC}`, {method:"POST", body}); ok = r.ok; }catch(e){}
+      if(!ok) await new Promise(r => setTimeout(r, 800 * (t + 1)));
+    }
+    if(!ok) throw new Error("send");
+  }
+}
+
+/* ---------- state ---------- */
+const DKEY = "uzf-brief-v3";
+let st = {lang:"ru", a:{}, no:"", view:"form", sent:false, saved:false, note:"", openRow:null, confirmDel:null, admMsg:"", tried:false};
+try{ const d = JSON.parse(localStorage.getItem(DKEY)||"null"); if(d){ st.a = d.a||{}; st.lang = d.lang||"ru"; st.no = d.no||""; } }catch(e){}
+if(!st.no) st.no = String(Math.floor(1000 + Math.random()*9000));
+let db = null, user = null, dl = null, canWrite = false, isOwner = false, rows = [], rowsReady = false;
+
+const T = () => UI[st.lang];
+const L = o => o ? (o[st.lang] || o.ru) : "";
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const roleKey = () => { const i = ROLES.findIndex(r => r.ru === st.a.role); return i < 0 ? null : ROLE_KEYS[i]; };
+const secsFor = rk => SECTIONS.filter(s => s.roles === "*" || (rk && s.roles.includes(rk)));
+function hasAns(id){ const v = st.a[id]; return Array.isArray(v) ? v.length > 0 : !!(v && String(v).trim()); }
+let saveT = null;
+function saveDraft(){ clearTimeout(saveT); saveT = setTimeout(() => { try{ localStorage.setItem(DKEY, JSON.stringify({a:st.a, lang:st.lang, no:st.no})); }catch(e){} }, 300); }
+const today = () => { const d = new Date(); return [d.getDate(), d.getMonth()+1, d.getFullYear()].map(x => String(x).padStart(2,"0")).join("."); };
+
+/* ---------- record / text ---------- */
+function buildRecord(){
+  const ans = {};
+  secsFor(roleKey()).forEach(s => s.q.forEach(q => { if(hasAns(q.id)) ans[q.id] = st.a[q.id]; const o = st.a[q.id+"__other"]; if(o && o.trim()) ans[q.id+"__other"] = o.trim(); }));
+  return {v:3, no:st.no, name:(st.a.name||"").trim(), role:roleKey(), lang:st.lang, ts:new Date().toISOString(), answers:ans};
+}
+function recordText(rec, lang){
+  const lg = lang || "ru", LL = o => o[lg] || o.ru, out = [];
+  let n = 0;
+  secsFor(rec.role).forEach(s => {
+    const lines = [];
+    s.q.forEach(q => {
+      n++;
+      if(rec.answers[q.id] === undefined && !rec.answers[q.id+"__other"]) return;
+      let v = rec.answers[q.id];
+      if(q.o){ const tr = x => { const o = q.o.find(o => o.ru === x); return o ? LL(o) : x; }; v = Array.isArray(v) ? v.map(tr).join(", ") : (v ? tr(v) : ""); }
+      const oth = rec.answers[q.id+"__other"]; if(oth) v = (v ? v + ", " : "") + oth;
+      lines.push(`${String(n).padStart(2,"0")}. ${LL(q.l)}\n    ${v}`);
+    });
+    if(lines.length){ out.push(LL(s.t).toUpperCase()); out.push(...lines); out.push(""); }
+  });
+  return out.join("\n");
+}
+function b64(s){ const b = new TextEncoder().encode(s); let bin = ""; b.forEach(x => bin += String.fromCharCode(x)); return btoa(bin); }
+function unb64(s){ const bin = atob(s); const u = new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) u[i] = bin.charCodeAt(i); return new TextDecoder().decode(u); }
+const head = rec => `${rec.lang==="uz"?"So'rovnoma":"Анкета"} №${rec.no} · Uzumfermer · ${rec.name}`;
+const payload = rec => head(rec) + "\n\n" + recordText(rec, rec.lang) + "\nUZF1:" + b64(JSON.stringify(rec));
+function tgHref(rec){
+  const body = "\n\n" + recordText(rec, rec.lang) + "\nUZF1:" + b64(JSON.stringify(rec));
+  const full = "https://t.me/share/url?url=" + encodeURIComponent(head(rec)) + "&text=" + encodeURIComponent(body);
+  if(full.length < 7000) return full;
+  return "https://t.me/share/url?url=" + encodeURIComponent(head(rec)) + "&text=" + encodeURIComponent(rec.lang==="uz" ? "\nJavoblar nusxalandi, shu yerga qo'ying." : "\nОтветы скопированы, вставьте их сюда.");
+}
+
+/* ---------- render ---------- */
+function field(q, n){
+  const t = T(), v = st.a[q.id];
+  const req = q.req ? `<span class="req">* ${t.req}</span>` : "";
+  const err = st.tried && q.req && !hasAns(q.id) ? `<p class="err" role="alert">${t.need}</p>` : "";
+  let body;
+  if(q.t === "text") body = `<input class="line" type="text" id="f_${q.id}" data-q="${q.id}" value="${esc(v||"")}" autocomplete="${q.id==="name"?"name":"off"}" aria-labelledby="t_${q.id}">`;
+  else if(q.t === "area") body = `<textarea class="ruled" id="f_${q.id}" data-q="${q.id}" rows="3" aria-labelledby="t_${q.id}">${esc(v||"")}</textarea>`;
+  else {
+    const multi = q.t === "multi";
+    body = (multi ? `<p class="multi">${t.multi}</p>` : "") + `<div class="boxes" role="${multi?"group":"radiogroup"}" aria-labelledby="t_${q.id}">${q.o.map((o,i) => {
+      const on = multi ? (Array.isArray(v) && v.includes(o.ru)) : v === o.ru;
+      return `<label class="bx"><input type="${multi?"checkbox":"radio"}" name="f_${q.id}" data-q="${q.id}" data-kind="${q.t}" value="${esc(o.ru)}"${on?" checked":""}><span class="sq"></span><span class="lb">${esc(L(o))}</span></label>`;
+    }).join("")}</div>` + (q.other ? `<div class="oth"><span>${t.other}</span><input class="line" type="text" data-q="${q.id}__other" value="${esc(st.a[q.id+"__other"]||"")}" aria-label="${t.other}"></div>` : "");
+  }
+  return `<div class="q" id="q_${q.id}"><div class="n">${String(n).padStart(2,"0")}</div><div><p class="t" id="t_${q.id}">${esc(L(q.l))}${req}</p>${q.h ? `<p class="h">${esc(L(q.h))}</p>` : ""}${body}${err}</div></div>`;
+}
+function formHTML(){
+  const t = T(), secs = secsFor(roleKey());
+  let n = 0;
+  const sections = secs.map((s, si) => `<section class="sec" aria-labelledby="s_${s.id}">
+      <div class="sec-h"><span class="let">${String(si+1).padStart(2,"0")}</span><h2 id="s_${s.id}">${esc(L(s.t))}</h2></div>
+      <p class="sec-note">${esc(L(s.sub))}</p>
+      ${s.q.map(q => field(q, ++n)).join("")}</section>`).join("");
+  const ok = hasAns("name") && roleKey(), rec = buildRecord();
+  const end = `<section class="end" id="send"><h2>${t.endH}</h2>
+      ${st.saved ? `<p><span class="stamp">${t.sent}</span></p><p>${t.thanks}</p>` : ok ? `<p>${t.endP}</p>
+        <div class="btns"><button type="button" class="b" id="sendBtn"${st.sending?" disabled":""}>${st.sending ? t.sending : t.sendBtn}</button></div>
+        <p class="note" id="note" role="status" style="color:var(--stamp)">${esc(st.note)}</p>` : `<p class="err" style="font-size:16px">${t.endNeed}</p>`}
+      ${st.saved ? `<p><button type="button" class="lk" id="againBtn">${t.again}</button></p>` : ""}</section>`;
+  return `<header class="hd"><div><div class="org"><b>Pro</b>motion · Media &amp; marketing agency</div><h1>${t.title}<span>${t.for}</span></h1></div>
+      <div class="no">${t.no} <b>${st.no}</b><br>${t.date} <b>${today()}</b></div></header>
+    <div class="meta"><span><span class="lbl">${t.lang}</span><span class="langs">
+      <label class="bx"><input type="radio" name="lng" data-lang="ru"${st.lang==="ru"?" checked":""}><span class="sq"></span><span class="lb">Русский</span></label>
+      <label class="bx"><input type="radio" name="lng" data-lang="uz"${st.lang==="uz"?" checked":""}><span class="sq"></span><span class="lb">O'zbekcha</span></label></span></span></div>
+    <div class="intro"><p>${t.p1}</p><p>${t.p2}</p><p class="how">${t.how}</p></div>
+    ${sections}${end}`;
+}
+function roleLabel(rk){ const i = ROLE_KEYS.indexOf(rk); return i < 0 ? "?" : L(ROLES[i]); }
+
+const LINK = "https://claude.ai/artifact/VyABNjyMrZLUxNwbxXymDJ";
+const INVITE = {
+  ru:"Здравствуйте! Это агентство Promotion. По просьбе Дмитрия собираем короткую анкету для всех, кто общается с гостями Uzumfermer: заявки, звонки, переписка. Займёт около 10 минут, можно с телефона.\n\nАнкета: " + LINK + "\n\nВ конце нажмите «Отправить в Telegram» и перешлите ответ мне. Спасибо!",
+  uz:"Assalomu alaykum! Bu Promotion agentligi. Dmitriyning iltimosiga ko'ra Uzumfermer mehmonlari bilan muloqot qiladigan barcha xodimlar uchun qisqa so'rovnoma yig'yapmiz: arizalar, qo'ng'iroqlar, yozishma. Taxminan 10 daqiqa oladi, telefondan ham bo'ladi.\n\nSo'rovnoma: " + LINK + "\n\nOxirida «Telegramga yuborish» tugmasini bosing va javobni menga yuboring. Rahmat!"
+};
+const norm = x => String(x||"").toLowerCase().replace(/ё/g,"е").replace(/[^\p{L}\s]/gu," ").split(/\s+/).filter(Boolean);
+function matchName(line, name){ const a = norm(line), b = norm(name); if(!a.length || !b.length) return false; return a.every(w => b.includes(w)) || b.every(w => a.includes(w)); }
+let roster = [], rosterDoc = null;
+function adminHTML(){
+  const a = T().adm;
+  const hd = `<header class="hd"><div><div class="org">Promotion · Uzumfermer</div><h1>${a.h}</h1></div><div class="no">${rows.length} / ${roster.length || "?"}</div></header><div class="intro"><p>${a.sub}</p></div>`;
+  if(!db) return hd + `<p>${a.nodb}</p>`;
+  const body = rows.length ? `<div class="tbl"><table><thead><tr><th>№</th><th>${a.name}</th><th>${a.role}</th><th>${a.date}</th><th>${a.src}</th><th></th></tr></thead><tbody>${rows.map(r => `<tr>
+      <td class="num">${esc(r.d.no||"")}</td><td>${esc(r.d.name)}</td><td>${esc(roleLabel(r.d.role))}</td><td class="num">${esc((r.d.ts||"").slice(0,10))}</td><td>${r.d.src==="paste"?a.tg:a.form}</td>
+      <td style="white-space:nowrap"><button type="button" class="lk" data-open="${r.id}">${st.openRow===r.id?a.hide:a.open}</button>
+      ${st.confirmDel===r.id ? `<button type="button" class="lk" style="color:var(--stamp)" data-delok="${r.id}">${a.sure}</button><button type="button" class="lk" data-delno="1">${a.no}</button>` : `<button type="button" class="lk" data-del="${r.id}">${a.del}</button>`}</td></tr>
+      ${st.openRow===r.id ? `<tr><td colspan="6"><pre class="out">${esc(recordText(r.d, st.lang))}</pre></td></tr>` : ""}`).join("")}</tbody></table></div>`
+    : `<p style="color:var(--soft)">${rowsReady ? a.empty : "…"}</p>`;
+  const tg = lg => "https://t.me/share/url?url=" + encodeURIComponent(LINK) + "&text=" + encodeURIComponent("\n" + INVITE[lg].replace("\n\n" + (lg==="uz"?"So'rovnoma: ":"Анкета: ") + LINK, ""));
+  const invite = `<section class="sec"><div class="sec-h"><h2>${a.t1}</h2></div><p class="sec-note">${a.inviteP}</p>
+    ${["ru","uz"].map(lg => `<div class="q" style="grid-template-columns:minmax(0,1fr)"><div><p class="t">${lg==="ru"?a.inviteRu:a.inviteUz}</p><pre class="out" id="inv_${lg}">${esc(INVITE[lg])}</pre>
+      <div class="btns" style="margin-top:10px"><a class="b" href="${esc(tg(lg))}" target="_blank" rel="noopener">${a.sendInv}</a><button type="button" class="b o" data-copyinv="${lg}">${a.copyInv}</button></div></div></div>`).join("")}
+    <p class="note" id="invNote" role="status"></p></section>`;
+  const matched = new Set();
+  const rl = roster.map(n => { const r = rows.find(r => matchName(n, r.d.name)); if(r) matched.add(r.id); return {n, r}; });
+  const extra = rows.filter(r => !matched.has(r.id));
+  const got = rl.filter(x => x.r).length;
+  const track = `<section class="sec"><div class="sec-h"><h2>${a.t2}</h2></div>
+    ${roster.length ? `<p class="sec-note" style="font-family:var(--mono);color:var(--ink)">${a.progress(got, roster.length)}</p>
+      <div class="tbl"><table><tbody>${rl.map((x,i) => `<tr><td class="num" style="width:44px">${String(i+1).padStart(2,"0")}</td><td>${esc(x.n)}</td>
+        <td>${x.r ? `<span style="color:var(--pen)">${esc(roleLabel(x.r.d.role))}</span>` : ""}</td>
+        <td style="text-align:right">${x.r ? `<span class="stamp" style="font-size:13px;padding:2px 8px;border-width:2px">${a.got}</span>` : `<span style="font-family:var(--mono);color:var(--soft)">${a.wait}</span>`}</td></tr>`).join("")}</tbody></table></div>
+      ${extra.length ? `<p class="sec-note">${a.notInList}: ${extra.map(r => esc(r.d.name)).join(", ")}</p>` : ""}`
+    : `<p class="sec-note">${a.noRoster}</p>`}
+    <div class="q" style="grid-template-columns:minmax(0,1fr);border:0"><div><p class="t">${a.rosterP}</p>
+      <textarea class="ruled" id="rosterBox" rows="6" aria-label="${a.rosterP}">${esc(roster.join("\n"))}</textarea>
+      <div class="btns" style="margin-top:10px"><button type="button" class="b o" id="rosterSave">${a.rosterSave}</button></div><p class="note" id="rosterNote" role="status"></p></div></div></section>`;
+  return hd + invite + track + `<section class="sec"><div class="sec-h"><h2>${a.t3}</h2></div>` + body + `</section><section class="end"><h2>${a.paste}</h2><textarea class="ruled" id="pasteBox" rows="5" aria-label="${a.paste}"></textarea>
+    <div class="btns"><button type="button" class="b" id="addBtn">${a.add}</button>${dl && rows.length ? `<button type="button" class="b o" id="csvBtn">${a.csv}</button>` : ""}</div><p class="note" role="status">${esc(st.admMsg)}</p></section>`;
+}
+function updateStrip(){
+  const t = T(), strip = document.getElementById("strip");
+  if(st.view === "admin"){ strip.hidden = true; return; }
+  strip.hidden = false;
+  const qs = secsFor(roleKey()).flatMap(s => s.q), a = qs.filter(q => hasAns(q.id) || (st.a[q.id+"__other"]||"").trim()).length;
+  document.getElementById("stripTxt").textContent = t.filled(a, qs.length);
+  document.getElementById("stripBar").style.width = Math.round(a / qs.length * 100) + "%";
+  document.getElementById("stripGo").textContent = t.toEnd;
+}
+function refreshEnd(){
+  const end = document.getElementById("send"); if(!end) return;
+  const tmp = document.createElement("div"); tmp.innerHTML = formHTML();
+  const fresh = tmp.querySelector("#send"); const open = end.querySelector("details")?.open;
+  end.replaceWith(fresh); if(open){ const d = fresh.querySelector("details"); if(d) d.open = true; }
+}
+function render(){
+  document.documentElement.lang = st.lang;
+  const tabs = document.getElementById("tabs"); tabs.hidden = !isOwner;
+  tabs.querySelector('[data-view="form"]').textContent = st.lang === "uz" ? "So'rovnoma" : "Анкета";
+  tabs.querySelector('[data-view="admin"]').textContent = st.lang === "uz" ? "Javoblar" : "Ответы";
+  tabs.querySelectorAll("[data-view]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.view === st.view)));
+  document.getElementById("app").innerHTML = st.view === "admin" && isOwner ? adminHTML() : formHTML();
+  updateStrip();
+}
+
+/* ---------- events ---------- */
+const app = document.getElementById("app");
+let endT = null;
+app.addEventListener("input", e => {
+  const el = e.target;
+  if(el.dataset.lang){ st.lang = el.dataset.lang; saveDraft(); render(); return; }
+  const id = el.dataset.q; if(!id) return;
+  if(el.dataset.kind === "multi") st.a[id] = [...app.querySelectorAll(`input[name="f_${id}"]:checked`)].map(x => x.value);
+  else if(el.dataset.kind === "single"){
+    const prev = roleKey(); st.a[id] = el.value;
+    if(id === "role" && prev !== roleKey()){ saveDraft(); const y = scrollY; render(); scrollTo(0, y); return; }
+  } else st.a[id] = el.value;
+  st.sent = false; st.note = "";
+  saveDraft(); updateStrip();
+  clearTimeout(endT); endT = setTimeout(refreshEnd, 250);
+});
+app.addEventListener("click", async e => {
+  const el = e.target.closest("button, a"); if(!el) return;
+  if(el.id === "sendBtn"){
+    if(st.sending) return; st.sending = true; st.note = ""; refreshEnd();
+    try{
+      await sendEncrypted({...buildRecord(), ts:new Date().toISOString()});
+      st.saved = true; try{ localStorage.removeItem(DKEY); }catch(e){}
+    }catch(err){ st.note = T().fail; }
+    st.sending = false; refreshEnd(); document.getElementById("send").scrollIntoView({behavior:"smooth", block:"center"}); return;
+  }
+  if(el.id === "fileBtn"){ const r = buildRecord(); try{ await dl.save({filename:`uzumfermer-anketa-${r.no}.txt`, data:payload(r)}); }catch(err){} return; }
+  if(el.id === "againBtn"){ st.a = {}; st.no = String(Math.floor(1000 + Math.random()*9000)); st.sent = st.saved = false; st.note = ""; saveDraft(); render(); scrollTo(0,0); return; }
+  if(el.dataset.open){ st.openRow = st.openRow === el.dataset.open ? null : el.dataset.open; render(); return; }
+  if(el.dataset.del){ st.confirmDel = el.dataset.del; render(); return; }
+  if(el.dataset.delno){ st.confirmDel = null; render(); return; }
+  if(el.dataset.delok){ try{ await db.doc("responses/" + el.dataset.delok).delete(); }catch(err){} st.confirmDel = null; render(); return; }
+  if(el.dataset.copyinv){ try{ await navigator.clipboard.writeText(INVITE[el.dataset.copyinv]); document.getElementById("invNote").textContent = T().adm.invCopied; }catch(err){ const r = document.createRange(); r.selectNodeContents(document.getElementById("inv_" + el.dataset.copyinv)); getSelection().removeAllRanges(); getSelection().addRange(r); } return; }
+  if(el.id === "rosterSave"){
+    const list = document.getElementById("rosterBox").value.split("\n").map(x => x.trim()).filter(Boolean);
+    try{ await db.doc("config/roster").set({names:list, ts:new Date().toISOString()}); roster = list; render(); const n = document.getElementById("rosterNote"); if(n) n.textContent = T().adm.rosterSaved; }catch(err){ const n = document.getElementById("rosterNote"); if(n) n.textContent = (err && err.message) || "error"; }
+    return;
+  }
+  if(el.id === "addBtn"){
+    const raw = document.getElementById("pasteBox").value, m = raw.match(/UZF1:\s*([A-Za-z0-9+/=\s]+)/);
+    let rec = null; try{ rec = m && JSON.parse(unb64(m[1].replace(/\s+/g,""))); }catch(err){}
+    if(!rec || !rec.answers){ st.admMsg = T().adm.bad; render(); return; }
+    try{ await db.collection("responses").add({...rec, src:"paste"}); st.admMsg = T().adm.added; }catch(err){ st.admMsg = (err && err.message) || "error"; }
+    render(); return;
+  }
+  if(el.id === "csvBtn"){
+    const qs = SECTIONS.flatMap(s => s.q.filter(q => !["name","role"].includes(q.id)));
+    const cell = x => `"${String(x ?? "").replace(/"/g,'""')}"`;
+    const hd = ["№","Имя","Должность","Дата","Источник", ...qs.map(q => q.l.ru)];
+    const lines = [hd.map(cell).join(";")].concat(rows.map(r => [r.d.no, r.d.name, roleLabel(r.d.role), (r.d.ts||"").slice(0,10), r.d.src, ...qs.map(q => {
+      let v = r.d.answers[q.id]; v = Array.isArray(v) ? v.join(", ") : (v||""); const o = r.d.answers[q.id+"__other"]; return o ? (v ? v + ", " : "") + o : v; })].map(cell).join(";")));
+    try{ await dl.save({filename:"uzumfermer-ankety.csv", data:"﻿" + lines.join("\r\n")}); }catch(err){}
+  }
+});
+document.getElementById("stripGo").addEventListener("click", e => {
+  e.preventDefault();
+  if(!(hasAns("name") && roleKey())){ st.tried = true; render(); document.getElementById("q_name").scrollIntoView({behavior:"smooth", block:"center"}); return; }
+  document.getElementById("send").scrollIntoView({behavior:"smooth"});
+});
+document.querySelectorAll("[data-view]").forEach(b => b.addEventListener("click", () => { st.view = b.dataset.view; render(); }));
+
+render();
+</script>
+
+</body></html>
